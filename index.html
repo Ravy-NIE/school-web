@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>វិទ្យាល័យ ព្រះសីហនុ បច្ចេកវិទ្យា និងវិទ្យាសាស្ត្រ | SPS-TECH</title>
+    <meta name="description" content="គេហទំព័រសាលារៀនទំនើប បង្ហាញព័ត៌មានសាលា បុគ្គលិក លោកគ្រូអ្នកគ្រូ និងបណ្ណាល័យឌីជីថល">
+    
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- NAVBAR HEADER -->
+    <header class="navbar">
+        <div class="container">
+            <a href="#" class="nav-brand">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <span style="display: block; font-size: 1.1rem; line-height: 1.2;">វិទ្យាល័យ ព្រះសីហនុ</span>
+                    <span style="font-size: 0.75rem; color: var(--accent-primary); letter-spacing: 1px;">SPS-TECH PORTAL</span>
+                </div>
+            </a>
+
+            <nav class="nav-menu" id="navMenu">
+                <a href="#hero" class="nav-link active">ដើម</a>
+                <a href="#programs" class="nav-link">កម្មវិធីសិក្សា</a>
+                <a href="#staff" class="nav-link">បុគ្គលិក</a>
+                <a href="#library" class="nav-link">បណ្ណាល័យ</a>
+                <a href="#news" class="nav-link">ព័ត៌មាន</a>
+                <a href="#contact" class="nav-link">ទំនាក់ទំនង</a>
+            </nav>
+
+            <div class="nav-actions">
+                <button class="btn-icon theme-toggle" id="themeToggleBtn" title="ប្តូរ Theme Dark/Light">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+                <a href="#library" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.875rem;">
+                    <i class="fa-solid fa-book-open"></i> បណ្ណាល័យ
+                </a>
+                <button class="mobile-toggle" id="mobileNavToggle" aria-label="បើកម៉ឺនុយ">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- HERO IMAGE SLIDER (5 SECONDS AUTO SLIDE) -->
+        <section class="slider-section" id="heroSlider">
+            <div class="slider-container">
+                <div class="slider-wrapper" id="sliderWrapper">
+                    <!-- Slide 1 -->
+                    <div class="slide active">
+                        <img src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=1400" alt="បរិស្ថានសាលារៀន និងបណ្ណាល័យ">
+                        <div class="slide-caption">
+                            <span class="slide-badge"><i class="fa-solid fa-school"></i> វិទ្យាល័យ ព្រះសីហនុ</span>
+                            <h2>បរិស្ថានសាលារៀនទំនើប និងបណ្ណាល័យឌីជីថល</h2>
+                            <p>បំពាក់ដោយឧបករណ៍បច្ចេកវិទ្យា និងធនធានសិក្សាស្រាវជ្រាវសំបូរបែប</p>
+                        </div>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div class="slide">
+                        <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=1400" alt="បន្ទប់ពិសោធន៍បច្ចេកវិទ្យា">
+                        <div class="slide-caption">
+                            <span class="slide-badge"><i class="fa-solid fa-laptop-code"></i> វិទ្យាសាស្ត្រកុំព្យូទ័រ</span>
+                            <h2>បន្ទប់ពិសោធន៍បច្ចេកវិទ្យាកុំព្យូទ័រ និង AI</h2>
+                            <p>រៀនសរសេរកូដ អភិវឌ្ឍន៍កម្មវិធី និងស្វែងយល់ពីបច្ចេកវិទ្យាបញ្ញាសិប្បនិម្មិត</p>
+                        </div>
+                    </div>
+                    <!-- Slide 3 -->
+                    <div class="slide">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1400" alt="ការសិក្សាពិសោធន៍ STEM">
+                        <div class="slide-caption">
+                            <span class="slide-badge"><i class="fa-solid fa-flask-vial"></i> ពិសោធន៍វិទ្យាសាស្ត្រ</span>
+                            <h2>ការសិក្សាពិសោធន៍វិទ្យាសាស្ត្រ និង STEM</h2>
+                            <p>អនុវត្តន៍ការពិសោធន៍ជាក់ស្តែងក្នុងបន្ទប់ពិសោធន៍គីមី រូបវិទ្យា និងជីវវិទ្យា</p>
+                        </div>
+                    </div>
+                    <!-- Slide 4 -->
+                    <div class="slide">
+                        <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1400" alt="ការបណ្តុះបណ្តាលសិស្ស">
+                        <div class="slide-caption">
+                            <span class="slide-badge"><i class="fa-solid fa-user-graduate"></i> ការអប់រំគុណភាព</span>
+                            <h2>ការបណ្តុះបណ្តាលសិស្សានុសិស្សប្រកបដោយគុណភាព</h2>
+                            <p>បង្កើតអនាគតដ៏ភ្លឺស្វាងសម្រាប់សិស្សានុសិស្សគ្រប់រូប</p>
+                        </div>
+                    </div>
+                    <!-- Slide 5 -->
+                    <div class="slide">
+                        <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&q=80&w=1400" alt="សកម្មភាពកីឡា">
+                        <div class="slide-caption">
+                            <span class="slide-badge"><i class="fa-solid fa-volleyball"></i> សកម្មភាពក្រៅម៉ោង</span>
+                            <h2>សកម្មភាពកីឡា និងការអភិវឌ្ឍសមត្ថភាពចម្រុះ</h2>
+                            <p>លើកកម្ពស់សុខភាពមាំមួន និងស្មារតីសាមគ្គីភាពក្នុងចំណោមសិស្សានុសិស្ស</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slider Controls -->
+                <button class="slider-btn prev-btn" id="prevSlideBtn" aria-label="រូបភាពមុន"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="slider-btn next-btn" id="nextSlideBtn" aria-label="រូបភាពបន្ទាប់"><i class="fa-solid fa-chevron-right"></i></button>
+
+                <!-- Slider Indicators / Dots -->
+                <div class="slider-dots" id="sliderDots">
+                    <span class="dot active" data-index="0"></span>
+                    <span class="dot" data-index="1"></span>
+                    <span class="dot" data-index="2"></span>
+                    <span class="dot" data-index="3"></span>
+                    <span class="dot" data-index="4"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- HERO SECTION -->
+        <section class="hero" id="hero">
+            <div class="hero-glow"></div>
+            <div class="container">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <span class="section-tag">
+                            <i class="fa-solid fa-sparkles"></i> សាលារៀនគំរូយុគសម័យឌីជីថល
+                        </span>
+                        <h1 class="hero-title">
+                            បណ្ដុះបណ្ដាល <span class="text-gradient">បច្ចេកវិទ្យា</span> និងវិទ្យាសាស្ត្រដើម្បីអនាគត
+                        </h1>
+                        <p class="hero-sub">
+                            ផ្ដល់ជូននូវការអប់រំកម្រិតស្តង់ដារ បំពាក់ដោយបន្ទប់ពិសោធន៍ទំនើប បណ្ណាល័យឌីជីថល និងគ្រូបង្រៀនដែលមានបទពិសោធន៍ខ្ពស់។
+                        </p>
+
+                        <div class="hero-buttons">
+                            <a href="#library" class="btn btn-primary">
+                                <i class="fa-solid fa-book-bookmark"></i> ចូលមើលបណ្ណាល័យឌីជីថល
+                            </a>
+                            <a href="#contact" class="btn btn-secondary">
+                                <i class="fa-solid fa-paper-plane"></i> ទំនាក់ទំនងសាលា
+                            </a>
+                        </div>
+
+                        <!-- STATS COUNTER -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" data-target="2450">0</div>
+                                <div class="stat-label">សិស្សសរុប</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" data-target="120">0</div>
+                                <div class="stat-label">បុគ្គលិក & គ្រូ</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" data-target="35">0</div>
+                                <div class="stat-label">កម្មវិធីសិក្សា</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" data-target="4800">0</div>
+                                <div class="stat-label">ឯកសារបណ្ណាល័យ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hero-visual">
+                        <div class="hero-image-card">
+                            <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800" alt="សកម្មភាពសិក្សាក្នុងសាលា">
+                            <div class="hero-card-overlay">
+                                <div style="display: flex; align-items: center; gap: 0.8rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--accent-emerald); display: flex; align-items: center; justify-content: center; color: white;">
+                                        <i class="fa-solid fa-award"></i>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem;">សាលារៀនឆ្នើមថ្នាក់ជាតិ 2024</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">ទទួលស្គាល់ដោយក្រសួងអប់រំ យុវជន និងកីឡា</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PROGRAMS / MAJORS SECTION -->
+        <section class="programs-section" id="programs">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag"><i class="fa-solid fa-book-open-reader"></i> កម្មវិធីសិក្សា</span>
+                    <h2 class="section-title">កម្មវិធីអប់រំបច្ចេកវិទ្យា និងវិទ្យាសាស្ត្រទំនើប</h2>
+                    <p class="section-desc">រៀបចំឡើងដើម្បីកសាងគ្រឹះយ៉ាងរឹងមាំសម្រាប់សិស្សានុសិស្ស ក្នុងការបន្តការសិក្សាថ្នាក់ឧត្តមសិក្សា និងអាជីពនាពេលអនាគត។</p>
+                </div>
+
+                <div class="programs-grid" id="programsGrid">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- STAFF DIRECTORY SECTION -->
+        <section class="staff-section" id="staff">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag"><i class="fa-solid fa-users"></i> បុគ្គលិក និងលោកគ្រូ-អ្នកគ្រូ</span>
+                    <h2 class="section-title">ព័ត៌មានថ្នាក់ដឹកនាំ និងលោកគ្រូ-អ្នកគ្រូ</h2>
+                    <p class="section-desc">ជួបជាមួយក្រុមការងារ និងគណៈគ្រប់គ្រងដែលមានសមត្ថភាព ជំនាញ និងការប្តេជ្ញាចិត្តខ្ពស់ក្នុងការអប់រំ។</p>
+                </div>
+
+                <!-- FILTER & SEARCH BAR -->
+                <div class="filter-bar">
+                    <div class="category-tabs" id="staffTabs">
+                        <button class="tab-btn active" data-dept="all">ទាំងអស់</button>
+                        <button class="tab-btn" data-dept="leadership">ថ្នាក់ដឹកនាំ</button>
+                        <button class="tab-btn" data-dept="teaching">គ្រូបង្រៀន</button>
+                        <button class="tab-btn" data-dept="admin">រដ្ឋបាល</button>
+                        <button class="tab-btn" data-dept="library">IT & បណ្ណាល័យ</button>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="staffSearchInput" placeholder="ស្វែងរកឈ្មោះ ឬតួនាទី...">
+                    </div>
+                </div>
+
+                <!-- STAFF GRID -->
+                <div class="staff-grid" id="staffGrid">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- DIGITAL LIBRARY SECTION -->
+        <section class="library-section" id="library">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag"><i class="fa-solid fa-book-journal-whills"></i> បណ្ណាល័យឌីជីថល</span>
+                    <h2 class="section-title">មជ្ឈមណ្ឌលឯកសារ និងសៀវភៅអេឡិចត្រូនិច</h2>
+                    <p class="section-desc">ស្វែងរក និងទាញយកសៀវភៅសិក្សា ឯកសារស្រាវជ្រាវ និងកិច្ចការស្រាវជ្រាវផ្សេងៗដោយឥតគិតថ្លៃ។</p>
+                </div>
+
+                <!-- FILTER & SEARCH BAR -->
+                <div class="filter-bar">
+                    <div class="category-tabs" id="docTabs">
+                        <button class="tab-btn active" data-cat="all">ទាំងអស់</button>
+                        <button class="tab-btn" data-cat="technology">បច្ចេកវិទ្យា</button>
+                        <button class="tab-btn" data-cat="science">វិទ្យាសាស្ត្រ</button>
+                        <button class="tab-btn" data-cat="history">ប្រវត្តិវិទ្យា</button>
+                        <button class="tab-btn" data-cat="language">ភាសាបរទេស</button>
+                        <button class="tab-btn" data-cat="economics">សេដ្ឋកិច្ច</button>
+                    </div>
+
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="docSearchInput" placeholder="ស្វែងរកចំណងជើងសៀវភៅ...">
+                    </div>
+                </div>
+
+                <!-- DOCUMENTS GRID -->
+                <div class="docs-grid" id="docsGrid">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- NEWS SECTION -->
+        <section class="news-section" id="news">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag"><i class="fa-solid fa-newspaper"></i> ព័ត៌មាន និងព្រឹត្តិការណ៍</span>
+                    <h2 class="section-title">ដំណឹងថ្មីៗ និងសកម្មភាពសាលា</h2>
+                    <p class="section-desc">តាមដានព័ត៌មាន ការប្រកាស និងសកម្មភាពសំខាន់ៗរបស់វិទ្យាល័យ ព្រះសីហនុ។</p>
+                </div>
+
+                <div class="news-grid" id="newsGrid">
+                    <!-- Dynamic rendering via JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <section class="contact-section" id="contact">
+            <div class="container">
+                <div class="text-center">
+                    <span class="section-tag"><i class="fa-solid fa-headset"></i> ទំនាក់ទំនង</span>
+                    <h2 class="section-title">ទំនាក់ទំនងមកកាន់សាលារៀន</h2>
+                    <p class="section-desc">យើងខ្ញុំរីករាយក្នុងការឆ្លើយតបរាល់សំណួរ និងផ្តល់ព័ត៌មានបន្ថែមជូនលោកអ្នក។</p>
+                </div>
+
+                <div class="contact-grid">
+                    <div class="contact-info">
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 1.05rem;">អាសយដ្ឋានសាលា</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">មហាវិថីព្រះនរោត្តម សង្កាត់ទន្លេបាសាក់ ខណ្ឌចំការមន រាជធានីភ្នំពេញ</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 1.05rem;">លេខទូរស័ព្ទទំនាក់ទំនង</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">+855 23 888 999 / +855 12 345 678</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fa-solid fa-envelope"></i></div>
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 1.05rem;">សារអេឡិចត្រូនិច (Email)</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">info@spstech.edu.kh</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon"><i class="fa-solid fa-clock"></i></div>
+                            <div>
+                                <h4 style="font-weight: 700; font-size: 1.05rem;">ម៉ោងធ្វើការ</h4>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">ថ្ងៃច័ន្ទ - ថ្ងៃសៅរ៍ (ម៉ោង ៧:០០ ព្រឹក - ៥:០០ ល្ងាច)</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="contact-form" id="contactForm">
+                        <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem;">ផ្ញើសារសាកសួរព័ត៌មាន</h3>
+                        <div class="form-group">
+                            <label for="contactName">ឈ្មោះពេញ</label>
+                            <input type="text" id="contactName" class="form-control" placeholder="ឧ. សុខ មករា" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactPhone">លេខទូរស័ព្ទ / អ៊ីមែល</label>
+                            <input type="text" id="contactPhone" class="form-control" placeholder="ឧ. 012 345 678" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contactMsg">ខ្លឹមសារសារ</label>
+                            <textarea id="contactMsg" class="form-control" placeholder="សរសេរសាររបស់អ្នកនៅទីនេះ..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fa-solid fa-paper-plane"></i> ផ្ញើសារឥឡូវនេះ
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="nav-brand" style="margin-bottom: 1rem;">
+                        <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                        <span style="color: white; font-weight: 700;">វិទ្យាល័យ ព្រះសីហនុ</span>
+                    </div>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                        គ្រឹះស្ថានអប់រំគំរូ ផ្តោតលើការបណ្តុះបណ្តាលចំណេះដឹង បច្ចេកវិទ្យាឌីជីថល វិទ្យាសាស្ត្រ និងសីលធម៌ ដើម្បីអនាគតភ្លឺស្វាងរបស់សិស្សានុសិស្ស។
+                    </p>
+                    <div style="display: flex; gap: 0.75rem;">
+                        <a href="#" class="btn-icon" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="btn-icon" title="Telegram"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="#" class="btn-icon" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="footer-title">តំណភ្ជាប់លឿន</h4>
+                    <ul class="footer-links">
+                        <li><a href="#hero">ទំព័រដើម</a></li>
+                        <li><a href="#programs">កម្មវិធីសិក្សា</a></li>
+                        <li><a href="#staff">ព័ត៌មានបុគ្គលិក</a></li>
+                        <li><a href="#library">បណ្ណាល័យឌីជីថល</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-title">បណ្ណាល័យ</h4>
+                    <ul class="footer-links">
+                        <li><a href="#library">សៀវភៅបច្ចេកវិទ្យា</a></li>
+                        <li><a href="#library">សៀវភៅវិទ្យាសាស្ត្រ</a></li>
+                        <li><a href="#library">ឯកសារប្រវត្តិវិទ្យា</a></li>
+                        <li><a href="#library">ភាសាបរទេស</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="footer-title">ព័ត៌មានទាក់ទង</h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-phone me-1"></i> +855 23 888 999</p>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-envelope me-1"></i> info@spstech.edu.kh</p>
+                    <p style="font-size: 0.85rem;"><i class="fa-solid fa-location-dot me-1"></i> ភ្នំពេញ, កម្ពុជា</p>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>© 2024-2026 វិទ្យាល័យ ព្រះសីហនុ បច្ចេកវិទ្យា និងវិទ្យាសាស្ត្រ (SPS-TECH). រក្សាសិទ្ធិគ្រប់យ៉ាង។</div>
+                <div>រចនាឡើងជាមួយ Kantumruy Pro & Modern Dark UI</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- GENERIC MODAL DIALOG -->
+    <div class="modal-overlay" id="genericModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">ចំណងជើង Modal</h3>
+                <button class="modal-close" id="modalCloseBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
