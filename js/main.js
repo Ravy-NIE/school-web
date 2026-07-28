@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. Setup Event Listeners & Admin Features
     setupEventListeners();
     initAdminUpload();
+    checkAdminNoticeBar();
 });
 
 /* ==========================================================================
@@ -395,6 +396,8 @@ function renderNews(cat = 'all', query = '') {
         return;
     }
     
+    const isAdmin = sessionStorage.getItem('admin_authenticated') === 'true' || localStorage.getItem('admin_authenticated') === 'true';
+
     container.innerHTML = filtered.map(item => `
         <div class="news-card" onclick="openNewsModal('${item.id}')" style="cursor: pointer;">
             <div style="position: relative; overflow: hidden; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
@@ -402,7 +405,8 @@ function renderNews(cat = 'all', query = '') {
                 <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); color: #38bdf8; font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); box-shadow: 0 4px 10px rgba(0,0,0,0.25);">
                     ${item.category}
                 </span>
-                <!-- ADMIN ACTION BUTTONS: EDIT & DELETE -->
+                ${isAdmin ? `
+                <!-- ADMIN ACTION BUTTONS: EDIT & DELETE (SHOWN ONLY TO LOGGED IN ADMIN) -->
                 <div style="position: absolute; top: 0.85rem; right: 0.85rem; display: flex; gap: 0.4rem; z-index: 10;">
                     <button type="button" class="news-edit-btn" onclick="openEditNewsModal('${item.id}', event)" title="កែសម្រួលព័ត៌មាននេះ (Admin)" style="background: rgba(59, 130, 246, 0.9); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: var(--transition); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);">
                         <i class="fa-solid fa-pen-to-square" style="font-size: 0.85rem;"></i>
@@ -411,6 +415,7 @@ function renderNews(cat = 'all', query = '') {
                         <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
                     </button>
                 </div>
+                ` : ''}
             </div>
             <div class="news-body">
                 <div class="news-date" style="display: flex; justify-content: space-between; align-items: center;">
@@ -435,6 +440,7 @@ function openNewsModal(id) {
     const modal = document.getElementById('genericModal');
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
+    const isAdmin = sessionStorage.getItem('admin_authenticated') === 'true' || localStorage.getItem('admin_authenticated') === 'true';
     
     modalTitle.innerText = "ព័ត៌មាន និងសកម្មភាពសាលា";
     modalBody.innerHTML = `
@@ -456,13 +462,17 @@ function openNewsModal(id) {
         </div>
         
         <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-color); flex-wrap: wrap; gap: 0.75rem;">
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button type="button" class="btn" onclick="openEditNewsModal('${item.id}'); closeModal();" style="padding: 0.45rem 1rem; font-size: 0.85rem; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); cursor: pointer;">
-                    <i class="fa-solid fa-pen-to-square me-1"></i> កែសម្រួលព័ត៌មាន (Admin)
-                </button>
-                <button type="button" class="btn" onclick="deleteNewsItem('${item.id}'); closeModal();" style="padding: 0.45rem 1rem; font-size: 0.85rem; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); cursor: pointer;">
-                    <i class="fa-solid fa-trash-can me-1"></i> លុបព័ត៌មាន (Admin)
-                </button>
+            <div>
+                ${isAdmin ? `
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" class="btn" onclick="openEditNewsModal('${item.id}'); closeModal();" style="padding: 0.45rem 1rem; font-size: 0.85rem; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); cursor: pointer;">
+                        <i class="fa-solid fa-pen-to-square me-1"></i> កែសម្រួលព័ត៌មាន (Admin)
+                    </button>
+                    <button type="button" class="btn" onclick="deleteNewsItem('${item.id}'); closeModal();" style="padding: 0.45rem 1rem; font-size: 0.85rem; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); cursor: pointer;">
+                        <i class="fa-solid fa-trash-can me-1"></i> លុបព័ត៌មាន (Admin)
+                    </button>
+                </div>
+                ` : ''}
             </div>
             <button class="btn btn-secondary" onclick="alert('ការចែករំលែកដំណឹងបានជោគជ័យ!')" style="font-size: 0.85rem;">
                 <i class="fa-solid fa-share-nodes me-1"></i> ចែករំលែក (Share)
@@ -824,6 +834,26 @@ function loadSavedAdminUploads() {
         }
     } catch (e) {
         console.error("Error loading custom hero image:", e);
+    }
+}
+
+function checkAdminNoticeBar() {
+    const isAdmin = sessionStorage.getItem('admin_authenticated') === 'true' || localStorage.getItem('admin_authenticated') === 'true';
+    const navBtn = document.getElementById('navAdminLoginBtn');
+    
+    if (isAdmin) {
+        if (navBtn) {
+            navBtn.innerHTML = `<i class="fa-solid fa-user-shield" style="color: #10b981;"></i> <span>Admin Dashboard</span>`;
+            navBtn.title = "ទៅកាន់ប្រព័ន្ធគ្រប់គ្រងសាលារៀន (Admin Dashboard)";
+        }
+
+        const bar = document.createElement('div');
+        bar.style.cssText = "background: linear-gradient(90deg, #1e3a8a, #2563eb); color: white; padding: 0.5rem 1rem; text-align: center; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 1rem; z-index: 9999; border-bottom: 1px solid rgba(255,255,255,0.2);";
+        bar.innerHTML = `
+            <span><i class="fa-solid fa-shield-halved me-1"></i> អ្នកកំពុងស្ថិតក្នុងសិទ្ធិ Admin (Role: Administrator) - ប៊ូតុងកែសម្រួល & លុប ត្រូវបានបង្ហាញ</span>
+            <a href="admin.html" style="background: white; color: #1d4ed8; padding: 0.2rem 0.65rem; border-radius: 4px; text-decoration: none; font-size: 0.78rem; font-weight: 700;">ទៅកាន់ Admin Dashboard</a>
+        `;
+        document.body.insertBefore(bar, document.body.firstChild);
     }
 }
 
