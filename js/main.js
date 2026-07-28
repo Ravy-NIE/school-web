@@ -347,6 +347,13 @@ function deleteNewsItem(id, event) {
             const saved = JSON.parse(localStorage.getItem('admin_uploaded_news') || '[]');
             const updatedSaved = saved.filter(n => n.id !== id);
             localStorage.setItem('admin_uploaded_news', JSON.stringify(updatedSaved));
+
+            // Also add to admin_deleted_news list so default items are hidden
+            const deleted = JSON.parse(localStorage.getItem('admin_deleted_news') || '[]');
+            if (!deleted.includes(id)) {
+                deleted.push(id);
+                localStorage.setItem('admin_deleted_news', JSON.stringify(deleted));
+            }
         } catch (e) {
             console.error("Error updating localStorage after deleting news:", e);
         }
@@ -702,8 +709,8 @@ function handleImageError(imgElem, type = 'news') {
 
     const titleText = type === 'hero' ? 'វិទ្យាល័យ ឧដុង្គ' : (type === 'staff' ? 'រូបភាពបុគ្គលិក' : (type === 'doc' ? 'សៀវភៅបណ្ណាល័យ' : 'ព័ត៌មាន និងសកម្មភាពសាលា'));
     
-    // Clean, high-quality SVG gradient placeholder with school icon
-    const svgData = `data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e293b'/%3E%3Cstop offset='100%25' stop-color='%230f172a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23bg)'/%3E%3Ccircle cx='400' cy='180' r='55' fill='%233b82f6' fill-opacity='0.25'/%3E%3Cpath d='M375 160h50v40h-50z' fill='%2338bdf8'/%3E%3Ctext x='400' y='275' font-family='sans-serif' font-size='22' font-weight='bold' fill='%23cbd5e1' text-anchor='middle'%3E${encodeURIComponent(titleText)}%3C/text%3E%3C/svg%3E`;
+    // Rich SVG graphic placeholder with school & camera design
+    const svgData = `data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Cdefs%3E%3ClinearGradient id='bgG' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e293b'/%3E%3Cstop offset='50%25' stop-color='%230f172a'/%3E%3Cstop offset='100%25' stop-color='%23172554'/%3E%3C/linearGradient%3E%3ClinearGradient id='accentG' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%233b82f6'/%3E%3Cstop offset='100%25' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23bgG)'/%3E%3Ccircle cx='400' cy='165' r='58' fill='url(%23accentG)' opacity='0.22'/%3E%3Ccircle cx='400' cy='165' r='42' fill='none' stroke='url(%23accentG)' stroke-width='2.5' opacity='0.7'/%3E%3Cpath d='M375 160 h50 v28 h-50 z M388 150 h24 v10 h-24 z' fill='%2338bdf8'/%3E%3Ccircle cx='400' cy='174' r='8' fill='%23ffffff'/%3E%3Ctext x='400' y='270' font-family='sans-serif' font-size='22' font-weight='bold' fill='%23f1f5f9' text-anchor='middle'%3E${encodeURIComponent(titleText)}%3C/text%3E%3Ctext x='400' y='302' font-family='sans-serif' font-size='13' fill='%2394a3b8' text-anchor='middle'%3EOudong High School - Technology %26 Science%3C/text%3E%3C/svg%3E`;
 
     imgElem.src = svgData;
 }
@@ -751,11 +758,33 @@ window.downloadDoc = downloadDoc;
 function loadSavedAdminUploads() {
     if (!window.schoolData) return;
 
+    // Filter out deleted news
+    try {
+        const deletedNewsIds = JSON.parse(localStorage.getItem('admin_deleted_news') || '[]');
+        if (Array.isArray(deletedNewsIds) && deletedNewsIds.length > 0) {
+            window.schoolData.news = window.schoolData.news.filter(n => !deletedNewsIds.includes(n.id));
+        }
+    } catch (e) {
+        console.error("Error applying deleted news filter:", e);
+    }
+
+    // Filter out deleted docs
+    try {
+        const deletedDocIds = JSON.parse(localStorage.getItem('admin_deleted_docs') || '[]');
+        if (Array.isArray(deletedDocIds) && deletedDocIds.length > 0) {
+            window.schoolData.libraryDocs = window.schoolData.libraryDocs.filter(d => !deletedDocIds.includes(d.id));
+        }
+    } catch (e) {
+        console.error("Error applying deleted docs filter:", e);
+    }
+
     // Load saved documents
     try {
         const savedDocs = JSON.parse(localStorage.getItem('admin_uploaded_docs') || '[]');
         if (Array.isArray(savedDocs) && savedDocs.length > 0) {
-            window.schoolData.libraryDocs.unshift(...savedDocs);
+            const existingIds = new Set(window.schoolData.libraryDocs.map(d => d.id));
+            const newDocs = savedDocs.filter(d => !existingIds.has(d.id));
+            window.schoolData.libraryDocs.unshift(...newDocs);
         }
     } catch (e) {
         console.error("Error loading saved admin docs:", e);
@@ -765,7 +794,9 @@ function loadSavedAdminUploads() {
     try {
         const savedNews = JSON.parse(localStorage.getItem('admin_uploaded_news') || '[]');
         if (Array.isArray(savedNews) && savedNews.length > 0) {
-            window.schoolData.news.unshift(...savedNews);
+            const existingIds = new Set(window.schoolData.news.map(n => n.id));
+            const newNews = savedNews.filter(n => !existingIds.has(n.id));
+            window.schoolData.news.unshift(...newNews);
         }
     } catch (e) {
         console.error("Error loading saved admin news:", e);

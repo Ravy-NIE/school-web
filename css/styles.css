@@ -1473,3 +1473,29 @@ body.light-theme .toast-notification {
         transform: translateY(0) scale(1);
     }
 }
+
+/* News Card Image Anti-Distortion & Admin Action Styles */
+.news-img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    background-color: var(--bg-card);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.news-card:hover .news-img {
+    transform: scale(1.05);
+}
+
+.news-edit-btn:hover {
+    background: #2563eb !important;
+    transform: scale(1.1);
+}
+
+.news-delete-btn:hover {
+    background: #dc2626 !important;
+    transform: scale(1.1);
+}
+

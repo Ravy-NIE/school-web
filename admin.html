@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធគ្រប់គ្រងសាលារៀន (Admin Dashboard) | Oudong High School</title>
+    <meta name="description" content="ប្រព័ន្ធគ្រប់គ្រងវេបសាយ វិទ្យាល័យ ឧដុង្គ បច្ចេកវិទ្យា និងវិទ្យាសាស្ត្រ">
+
+    <!-- CSS Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Custom Admin Styles -->
+    <style>
+        :root {
+            --admin-sidebar-width: 260px;
+        }
+
+        .admin-page-body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Admin Navbar */
+        .admin-navbar {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.75rem 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+
+        .admin-nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .admin-brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        .admin-role-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.35rem 0.85rem;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        /* Authentication Overlay */
+        .admin-auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(16px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .admin-auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 440px;
+            padding: 2.25rem;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .admin-auth-card .lock-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.4));
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin: 0 auto 1.25rem auto;
+        }
+
+        /* Dashboard Layout */
+        .admin-main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        .admin-header-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200') center/cover;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.light-theme .admin-header-banner {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(241, 245, 249, 0.95)), url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=1200') center/cover;
+        }
+
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            transition: var(--transition);
+        }
+
+        .admin-stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .admin-stat-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        /* Tabs Header */
+        .admin-nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .admin-nav-tab {
+            padding: 0.75rem 1.4rem;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .admin-nav-tab.active {
+            background: var(--accent-primary);
+            color: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .admin-nav-tab:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Data Tables */
+        .admin-table-wrapper {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .admin-table th {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 0.9rem 1.25rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        body.light-theme .admin-table th {
+            background: #f8fafc;
+        }
+
+        .admin-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .admin-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .table-thumb {
+            width: 56px;
+            height: 42px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-action {
+            padding: 0.45rem 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            transition: var(--transition);
+        }
+
+        .btn-edit {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-edit:hover {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-delete:hover {
+            background: #ef4444;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body class="admin-page-body">
+
+    <!-- ADMIN AUTHENTICATION OVERLAY (LOGIN LOCK) -->
+    <div class="admin-auth-overlay" id="adminAuthOverlay">
+        <div class="admin-auth-card">
+            <div class="lock-icon">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+            <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.35rem;">ផ្ទៀងផ្ទាត់សិទ្ធិ Admin</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                សូមបញ្ចូលពាក្យសម្ងាត់សុវត្ថិភាពដើម្បីចូលប្រើប្រាស់ប្រព័ន្ធគ្រប់គ្រងសាលារៀន (Role Administrator)
+            </p>
+
+            <form id="adminLoginForm">
+                <div class="form-group" style="margin-bottom: 1rem; text-align: left;">
+                    <label for="adminUsername" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ឈ្មោះអ្នកប្រើប្រាស់ (Username)</label>
+                    <input type="text" id="adminUsername" class="form-control" value="admin" placeholder="admin" required style="width: 100%;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem; text-align: left;">
+                    <label for="adminPassword" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ពាក្យសម្ងាត់ (Password)</label>
+                    <input type="password" id="adminPassword" class="form-control" placeholder="••••••••" required style="width: 100%;">
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem;">
+                        <i class="fa-solid fa-key me-1"></i> ពាក្យសម្ងាត់គំរូដំបូង: <strong style="color: var(--accent-primary);">admin123</strong>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.8rem; font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem;">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i> ចូលប្រព័ន្ធគ្រប់គ្រង (Admin Login)
+                </button>
+
+                <button type="button" class="btn btn-secondary" onclick="quickAdminUnlock()" style="width: 100%; padding: 0.65rem; font-size: 0.85rem;">
+                    <i class="fa-solid fa-bolt me-1"></i> រំលងចូលផ្ទាល់ (Quick Access Demo)
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN NAVBAR HEADER -->
+    <header class="admin-navbar">
+        <div class="admin-nav-container">
+            <a href="index.html" class="admin-brand" title="ទៅកាន់ទំព័រដើមសាលារៀន">
+                <div class="admin-brand-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <span style="display: block; font-size: 1.05rem; font-weight: 700; line-height: 1.2;">ប្រព័ន្ធគ្រប់គ្រងសាលារៀន</span>
+                    <span style="font-size: 0.75rem; color: var(--accent-primary); letter-spacing: 0.5px;">Oudong High School Admin Portal</span>
+                </div>
+            </a>
+
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <button class="btn-icon theme-toggle" id="themeToggleBtn" title="ប្តូរ Theme Dark/Light">
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+
+                <a href="index.html" target="_blank" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem;">
+                    <i class="fa-solid fa-globe" style="color: var(--accent-primary);"></i>
+                    <span>មើលវេបសាយផ្ទាល់ (Live Site)</span>
+                </a>
+
+                <div class="admin-role-badge">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Role: Administrator</span>
+                </div>
+
+                <button class="btn btn-secondary" onclick="adminSignOut()" style="padding: 0.5rem 0.85rem; font-size: 0.85rem;" title="ចាកចេញ">
+                    <i class="fa-solid fa-right-from-bracket" style="color: #ef4444;"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ADMIN MAIN CONTENT CONTAINER -->
+    <main class="admin-main-container">
+
+        <!-- WELCOME HEADER BANNER -->
+        <div class="admin-header-banner">
+            <div style="max-width: 800px; position: relative; z-index: 2;">
+                <span style="background: rgba(59, 130, 246, 0.2); color: var(--accent-primary); border: 1px solid rgba(59, 130, 246, 0.3); padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.78rem; font-weight: 600; display: inline-block; margin-bottom: 0.75rem;">
+                    <i class="fa-solid fa-sliders me-1"></i> Dashboard Management
+                </span>
+                <h1 style="font-size: 1.85rem; font-weight: 700; margin-bottom: 0.5rem;">
+                    គ្រប់គ្រងទិន្នន័យ និងកំណត់រចនាសម្ព័ន្ធវេបសាយសាលារៀន
+                </h1>
+                <p style="color: var(--text-muted); font-size: 0.92rem; margin: 0; line-height: 1.6;">
+                    ទំព័រនេះត្រូវបានបង្កើតឡើងសម្រាប់តែ Role Administrator ក្នុងការដូររូបភាព Hero Banner, ផ្លាស់ប្តូរ/លុបព័ត៌មាន, និងបន្ថែមសៀវភៅបណ្ណាល័យឌីជីថល។ រាល់ការផ្លាស់ប្តូរនឹងធ្វើបច្ចុប្បន្នភាពលើវេបសាយដើមដោយស្វ័យប្រវត្តិ។
+                </p>
+            </div>
+        </div>
+
+        <!-- STATS OVERVIEW CARDS -->
+        <div class="admin-stats-grid">
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                    <i class="fa-solid fa-newspaper"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 700; line-height: 1;" id="statNewsCount">0</div>
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">ព័ត៌មាន & ការប្រកាស</div>
+                </div>
+            </div>
+
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1.5rem; font-weight: 700; line-height: 1;" id="statDocsCount">0</div>
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">ឯកសារបណ្ណាល័យ</div>
+                </div>
+            </div>
+
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">
+                    <i class="fa-solid fa-image"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 700; color: #10b981; line-height: 1.2;" id="statHeroStatus">សកម្ម (Active)</div>
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">រូបភាព Hero Banner</div>
+                </div>
+            </div>
+
+            <div class="admin-stat-card">
+                <div class="admin-stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                    <div style="font-size: 1rem; font-weight: 700; color: var(--text-main); line-height: 1.2;">Admin Logged In</div>
+                    <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem;">ស្ថានភាពសិទ្ធិ (Role)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN TAB NAVIGATION -->
+        <div class="admin-nav-tabs">
+            <button class="admin-nav-tab active" onclick="switchAdminTab('hero', this)">
+                <i class="fa-solid fa-image"></i> គ្រប់គ្រងរូបភាព Hero
+            </button>
+            <button class="admin-nav-tab" onclick="switchAdminTab('news', this)">
+                <i class="fa-solid fa-newspaper"></i> គ្រប់គ្រងព័ត៌មាន & ការប្រកាស
+            </button>
+
+            <button class="admin-nav-tab" onclick="switchAdminTab('docs', this)">
+                <i class="fa-solid fa-book-medical"></i> គ្រប់គ្រងបណ្ណាល័យឌីជីថល
+            </button>
+            <button class="admin-nav-tab" onclick="switchAdminTab('settings', this)">
+                <i class="fa-solid fa-sliders"></i> កំណត់ប្រព័ន្ធ & Reset
+            </button>
+        </div>
+
+        <!-- TAB PANEL 1: HERO IMAGE MANAGEMENT -->
+        <div id="panel-hero" class="admin-tab-panel">
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700;">កំណត់ និងផ្លាស់ប្តូររូបភាព Hero Banner</h3>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.82rem; color: var(--text-muted);">ផ្លាស់ប្តូររូបភាពធំផ្នែកខាងលើនៃទំព័រដើមសាលារៀន</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="resetHeroImage()" style="font-size: 0.85rem;">
+                        <i class="fa-solid fa-rotate-left me-1"></i> កំណត់រូបភាពដើមវិញ (Reset)
+                    </button>
+                </div>
+
+                <form id="adminHeroForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label for="adminHeroFile" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem;">ជ្រើសរើសរូបភាពពីកុំព្យូទ័រ (Image File Upload)</label>
+                            <input type="file" id="adminHeroFile" accept="image/*" class="form-control" style="padding: 0.5rem;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label for="adminHeroUrl" style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem;">ឬបញ្ចូល Web URL រូបភាព</label>
+                            <input type="url" id="adminHeroUrl" class="form-control" placeholder="https://images.unsplash.com/photo-...">
+                        </div>
+
+                        <div style="background: rgba(59, 130, 246, 0.08); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+                            <div style="font-size: 0.88rem; font-weight: 600; margin-bottom: 0.35rem; color: var(--accent-primary);"><i class="fa-solid fa-shield-halved me-1"></i> បច្ចេកវិទ្យា Anti-Distortion:</div>
+                            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+                                រូបភាពដែលបានជ្រើសរើស នឹងត្រូវបានតម្រឹមដោយស្វ័យប្រវត្តិតាមរយៈ CSS `object-fit: cover` ធ្វើឱ្យបង្ហាញស្អាត មិនទាញពង្រីក មិនស្រុត និងមិនខូចទ្រង់ទ្រាយឡើយ។
+                            </p>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-size: 0.95rem; font-weight: 600;">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> រក្សាទុក និងផ្លាស់ប្តូររូបភាព Hero
+                        </button>
+                    </div>
+
+                    <div>
+                        <label style="display: block; font-size: 0.88rem; font-weight: 600; margin-bottom: 0.4rem;">មើលគំរូរូបភាព (Live Preview)</label>
+                        <div style="width: 100%; height: 260px; border-radius: var(--radius-md); overflow: hidden; border: 2px dashed var(--border-color); background: var(--bg-main); display: flex; align-items: center; justify-content: center; position: relative;">
+                            <img id="adminHeroPreview" src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB PANEL 2: NEWS MANAGEMENT -->
+        <div id="panel-news" class="admin-tab-panel" style="display: none;">
+            <div style="display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem;">
+                <!-- ADD NEWS FORM -->
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; height: fit-content;">
+                    <h3 style="margin: 0 0 1.25rem 0; font-size: 1.15rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                        <i class="fa-solid fa-paper-plane me-1" style="color: var(--accent-primary);"></i> ចុះផ្សាយព័ត៌មានថ្មី
+                    </h3>
+
+                    <form id="adminAddNewsForm">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="newsTitle" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ចំណងជើងព័ត៌មាន / ការប្រកាស *</label>
+                            <input type="text" id="newsTitle" class="form-control" placeholder="ឧ. ការប្រកាសអាហារូបករណ៍ឆ្នាំ ២០២៦" required style="width: 100%;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="newsCategory" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ប្រភេទព័ត៌មាន *</label>
+                            <select id="newsCategory" class="form-control" required style="width: 100%;">
+                                <option value="ការចុះឈ្មោះ">ការចុះឈ្មោះ (Admission)</option>
+                                <option value="ជ័យលាភី">ជ័យលាភី & ពានរង្វាន់ (Awards)</option>
+                                <option value="ព្រឹត្តិការណ៍">ព្រឹត្តិការណ៍សាលា (Events)</option>
+                                <option value="ជូនដំណឹង">ការជូនដំណឹង (Announcement)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="newsDate" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">កាលបរិច្ឆេទ</label>
+                            <input type="text" id="newsDate" class="form-control" value="២៨ កក្កដា ២០២៦">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="newsImgFile" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">រូបភាព (File ឬ URL)</label>
+                            <input type="file" id="newsImgFile" accept="image/*" class="form-control" style="padding: 0.4rem; margin-bottom: 0.35rem;">
+                            <input type="url" id="newsImgUrl" class="form-control" placeholder="https://images.unsplash.com/...">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label for="newsSummary" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ខ្លឹមសារព័ត៌មានសង្ខេប *</label>
+                            <textarea id="newsSummary" class="form-control" rows="4" placeholder="សរសេរខ្លឹមសារព័ត៌មានសង្ខេប..." required style="width: 100%;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 600;">
+                            <i class="fa-solid fa-plus me-1"></i> ចុះផ្សាយព័ត៌មាន
+                        </button>
+                    </form>
+                </div>
+
+                <!-- NEWS LIST TABLE -->
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">បញ្ជីព័ត៌មាន & ការប្រកាសទាំងអស់</h3>
+                        <input type="text" id="newsSearchInput" class="form-control" placeholder="ស្វែងរកព័ត៌មាន..." style="max-width: 250px;" oninput="filterAdminNews()">
+                    </div>
+
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>រូបភាព</th>
+                                    <th>ចំណងជើង</th>
+                                    <th>ប្រភេទ</th>
+                                    <th>កាលបរិច្ឆេទ</th>
+                                    <th style="text-align: right;">សកម្មភាព (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminNewsTableBody">
+                                <!-- Dynamic Render via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PANEL 3: DIGITAL LIBRARY MANAGEMENT -->
+        <div id="panel-docs" class="admin-tab-panel" style="display: none;">
+            <div style="display: grid; grid-template-columns: 380px 1fr; gap: 1.5rem;">
+                <!-- ADD DOC FORM -->
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; height: fit-content;">
+                    <h3 style="margin: 0 0 1.25rem 0; font-size: 1.15rem; font-weight: 700; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+                        <i class="fa-solid fa-book-medical me-1" style="color: var(--accent-primary);"></i> បន្ថែមឯកសារបណ្ណាល័យ
+                    </h3>
+
+                    <form id="adminAddDocForm">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="docTitle" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ចំណងជើងសៀវភៅ/ឯកសារ *</label>
+                            <input type="text" id="docTitle" class="form-control" placeholder="ឧ. សៀវភៅ Python & AI" required style="width: 100%;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="docCategory" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ប្រភេទឯកសារ *</label>
+                            <select id="docCategory" class="form-control" required style="width: 100%;">
+                                <option value="technology">បច្ចេកវិទ្យា (Technology)</option>
+                                <option value="science">វិទ្យាសាស្ត្រ (Science)</option>
+                                <option value="history">ប្រវត្តិវិទ្យា (History)</option>
+                                <option value="language">ភាសាបរទេស (Language)</option>
+                                <option value="economics">សេដ្ឋកិច្ច (Economics)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="docAuthor" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">អ្នកនិពន្ធ / គ្រូបង្រៀន *</label>
+                            <input type="text" id="docAuthor" class="form-control" placeholder="ឧ. លោក គង់ ទិត្យដារ៉ាវី" required style="width: 100%;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                            <div class="form-group">
+                                <label for="docYear" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ឆ្នាំបោះពុម្ព</label>
+                                <input type="text" id="docYear" class="form-control" value="2026">
+                            </div>
+                            <div class="form-group">
+                                <label for="docPages" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ចំនួនទំព័រ</label>
+                                <input type="number" id="docPages" class="form-control" value="180">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label for="docCoverFile" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">រូបភាពគម្របសៀវភៅ (Image)</label>
+                            <input type="file" id="docCoverFile" accept="image/*" class="form-control" style="padding: 0.4rem; margin-bottom: 0.35rem;">
+                            <input type="url" id="docCoverUrl" class="form-control" placeholder="https://images.unsplash.com/...">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 1.25rem;">
+                            <label for="docDesc" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ការពិពណ៌នាសង្ខេប *</label>
+                            <textarea id="docDesc" class="form-control" rows="3" placeholder="ពិពណ៌នាអំពីខ្លឹមសារសៀវភៅ..." required style="width: 100%;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 600;">
+                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Upload ឯកសារ
+                        </button>
+                    </form>
+                </div>
+
+                <!-- DOCS LIST TABLE -->
+                <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+                        <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700;">បញ្ជីឯកសារបណ្ណាល័យទាំងអស់</h3>
+                        <input type="text" id="docSearchInput" class="form-control" placeholder="ស្វែងរកសៀវភៅ..." style="max-width: 250px;" oninput="filterAdminDocs()">
+                    </div>
+
+                    <div class="admin-table-wrapper">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>គម្រប</th>
+                                    <th>ចំណងជើងសៀវភៅ</th>
+                                    <th>ប្រភេទ</th>
+                                    <th>អ្នកនិពន្ធ</th>
+                                    <th style="text-align: right;">សកម្មភាព (Actions)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminDocsTableBody">
+                                <!-- Dynamic Render via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PANEL 4: SYSTEM SETTINGS & RESET -->
+        <div id="panel-settings" class="admin-tab-panel" style="display: none;">
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; max-width: 800px; box-shadow: var(--shadow-sm);">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; font-weight: 700; color: var(--accent-primary);">
+                    <i class="fa-solid fa-sliders me-1"></i> កំណត់ប្រព័ន្ធ & Reset ទិន្នន័យសាលា
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                    ប្រសិនបើអ្នកចង់កំណត់ប្រព័ន្ធ និងទិន្នន័យវេបសាយទាំងអស់ (ព័ត៌មាន, សៀវភៅ, រូបភាព Hero) ឱ្យត្រឡប់មកទិន្នន័យដើមដំបូងវិញ អ្នកអាចចុចប៊ូតុងខាងក្រោម៖
+                </p>
+
+                <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.75rem;">
+                    <div style="color: #ef4444; font-weight: 700; font-size: 0.95rem; margin-bottom: 0.35rem;">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> ការព្រមានចុងក្រោយ (Warning):
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
+                        ការ Reset នឹងលុបរាល់ព័ត៌មានដែលបាន Upload ថ្មី និងរូបភាព Hero Banner ដែលបានប្តូរចេញពីប្រព័ន្ធ `localStorage` ហើយស្តារទិន្នន័យដើមរបស់សាលារៀនឡើងវិញ។
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="factoryResetAdminData()" style="padding: 0.75rem 1.5rem; font-weight: 600; border-color: rgba(239, 68, 68, 0.4); color: #ef4444;">
+                    <i class="fa-solid fa-trash-arrow-up me-1"></i> កំណត់ទិន្នន័យដើមឡើងវិញ (Factory Reset All Data)
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ADMIN EDIT NEWS MODAL DIALOG -->
+    <div class="modal-overlay" id="adminEditNewsModal">
+        <div class="modal-container" style="max-width: 650px;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem;">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </div>
+                    <div>
+                        <h3 class="modal-title" style="margin: 0; font-size: 1.15rem;">កែសម្រួលព័ត៌មាន & សកម្មភាពសាលា</h3>
+                        <p style="margin: 0; font-size: 0.78rem; color: var(--text-muted);">កែប្រែអត្ថបទ ចំណងជើង ប្រភេទ និងរូបភាពព័ត៌មាន (Admin Edit)</p>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeEditNewsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body" style="padding: 1.5rem;">
+                <form id="adminEditNewsForm">
+                    <input type="hidden" id="editNewsId">
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="editNewsTitle" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ចំណងជើងព័ត៌មាន / ព្រឹត្តិការណ៍ *</label>
+                        <input type="text" id="editNewsTitle" class="form-control" required style="width: 100%;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label for="editNewsCategory" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ប្រភេទព័ត៌មាន *</label>
+                            <select id="editNewsCategory" class="form-control" required style="width: 100%;">
+                                <option value="ការចុះឈ្មោះ">ការចុះឈ្មោះ</option>
+                                <option value="ជ័យលាភី">ជ័យលាភី & ការរង្វាន់</option>
+                                <option value="ព្រឹត្តិការណ៍">ព្រឹត្តិការណ៍សាលា</option>
+                                <option value="ជូនដំណឹង">ការជូនដំណឹង</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editNewsAuthor" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">អ្នកចុះផ្សាយ / អ្នកនិពន្ធ</label>
+                            <input type="text" id="editNewsAuthor" class="form-control" placeholder="ឧ. គណៈគ្រប់គ្រងសាលា">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="editNewsDate" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">កាលបរិច្ឆេទ</label>
+                        <input type="text" id="editNewsDate" class="form-control">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label for="editNewsImgFile" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ផ្លាស់ប្តូររូបភាពព័ត៌មាន (Image File Upload)</label>
+                        <input type="file" id="editNewsImgFile" accept="image/*" class="form-control" style="padding: 0.4rem; margin-bottom: 0.4rem;">
+                        <input type="url" id="editNewsImgUrl" class="form-control" placeholder="ឬបញ្ចូល URL រូបភាព: https://...">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">មើលគំរូរូបភាព (Live Preview - Anti-Distortion)</label>
+                        <div style="width: 100%; height: 180px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-card); display: flex; align-items: center; justify-content: center;">
+                            <img id="editNewsPreviewImg" src="" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        <label for="editNewsSummary" style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.35rem;">ខ្លឹមសារព័ត៌មានសង្ខេប / អត្ថបទ *</label>
+                        <textarea id="editNewsSummary" class="form-control" rows="4" required style="width: 100%;"></textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditNewsModal()" style="padding: 0.65rem 1.25rem;">បោះបង់</button>
+                        <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; font-weight: 600;">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> រក្សាទុកការកែសម្រួល
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
