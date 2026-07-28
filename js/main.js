@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     initAdminUpload();
     checkAdminNoticeBar();
+    initIndexAdminLoginModal();
 });
 
 /* ==========================================================================
@@ -843,7 +844,8 @@ function checkAdminNoticeBar() {
     
     if (isAdmin) {
         if (navBtn) {
-            navBtn.innerHTML = `<i class="fa-solid fa-user-shield" style="color: #10b981;"></i> <span>Admin Dashboard</span>`;
+            navBtn.classList.add('logged-in');
+            navBtn.innerHTML = `<i class="fa-solid fa-user-shield"></i>`;
             navBtn.title = "ទៅកាន់ប្រព័ន្ធគ្រប់គ្រងសាលារៀន (Admin Dashboard)";
         }
 
@@ -856,6 +858,100 @@ function checkAdminNoticeBar() {
         document.body.insertBefore(bar, document.body.firstChild);
     }
 }
+
+function initIndexAdminLoginModal() {
+    const navBtn = document.getElementById('navAdminLoginBtn');
+    const modal = document.getElementById('indexAdminLoginModal');
+    const form = document.getElementById('indexAdminLoginForm');
+    const errorBox = document.getElementById('indexAdminLoginError');
+    const passInput = document.getElementById('popupAdminPassword');
+    const userInput = document.getElementById('popupAdminUsername');
+    const togglePassBtn = document.getElementById('toggleIndexAdminPasswordBtn');
+    const togglePassIcon = document.getElementById('toggleIndexAdminPasswordIcon');
+
+    // Password Visibility Toggle
+    if (togglePassBtn && passInput && togglePassIcon) {
+        togglePassBtn.addEventListener('click', () => {
+            const isPass = passInput.getAttribute('type') === 'password';
+            passInput.setAttribute('type', isPass ? 'text' : 'password');
+            togglePassIcon.className = isPass ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        });
+    }
+
+    if (navBtn) {
+        navBtn.addEventListener('click', (e) => {
+            const isAdmin = sessionStorage.getItem('admin_authenticated') === 'true' || localStorage.getItem('admin_authenticated') === 'true';
+            if (isAdmin) {
+                // Already authenticated, navigate directly to admin dashboard
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            e.preventDefault();
+            if (modal) {
+                if (errorBox) errorBox.style.display = 'none';
+                if (passInput) {
+                    passInput.value = '';
+                    passInput.setAttribute('type', 'password');
+                    passInput.style.borderColor = '';
+                }
+                if (togglePassIcon) togglePassIcon.className = 'fa-solid fa-eye';
+                if (userInput) {
+                    userInput.value = '';
+                    userInput.style.borderColor = '';
+                }
+                modal.classList.add('active');
+            }
+        });
+    }
+
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeIndexAdminLoginModal();
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = userInput ? userInput.value.trim() : '';
+            const password = passInput ? passInput.value.trim() : '';
+
+            // Check admin credentials (admin / admin123)
+            if ((username === 'admin' || username === '') && (password === 'admin123' || password === 'admin')) {
+                // Correct Password -> Authenticate as Admin
+                sessionStorage.setItem('admin_authenticated', 'true');
+                localStorage.setItem('admin_authenticated', 'true');
+
+                if (errorBox) errorBox.style.display = 'none';
+                closeIndexAdminLoginModal();
+                showToast('បានផ្ទៀងផ្ទាត់សិទ្ធិ Admin ដោយជោគជ័យ!', 'success');
+
+                // Redirect to Admin Portal
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 400);
+            } else {
+                // INCORRECT PASSWORD -> BLOCK ACCESS COMPLETELY (ហាមអ្នកផ្សេងចូល)
+                if (errorBox) {
+                    errorBox.style.display = 'block';
+                    errorBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation me-1" style="font-size: 1rem;"></i> <span><strong>បដិសេធការចូលប្រព័ន្ធ!</strong> ពាក្យសម្ងាត់ ឬឈ្មោះមិនត្រឹមត្រូវឡើយ។ ហាមអ្នកផ្សេងចូលប្រើប្រាស់!</span>`;
+                }
+                if (passInput) {
+                    passInput.style.borderColor = '#ef4444';
+                    passInput.focus();
+                }
+            }
+        });
+    }
+}
+
+function closeIndexAdminLoginModal() {
+    const modal = document.getElementById('indexAdminLoginModal');
+    if (modal) modal.classList.remove('active');
+}
+
+window.closeIndexAdminLoginModal = closeIndexAdminLoginModal;
 
 function showToast(message, type = 'success') {
     const container = document.getElementById('toastContainer');

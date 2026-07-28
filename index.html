@@ -41,9 +41,8 @@
                 <button class="btn-icon theme-toggle" id="themeToggleBtn" title="ប្តូរ Theme Dark/Light">
                     <i class="fa-solid fa-sun"></i>
                 </button>
-                <a href="admin.html" class="btn btn-secondary" id="navAdminLoginBtn" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem;" title="ចូលប្រព័ន្ធ Admin សម្រាប់កែសម្រួលទិន្នន័យ">
-                    <i class="fa-solid fa-right-to-bracket" style="color: var(--accent-primary);"></i>
-                    <span id="navAdminLoginText">ចូលប្រព័ន្ធ (Login)</span>
+                <a href="admin.html" class="admin-nav-login-btn" id="navAdminLoginBtn" title="ចូលប្រព័ន្ធ Admin (Admin Login)">
+                    <i class="fa-solid fa-user-shield"></i>
                 </a>
                 <a href="#library" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.875rem;">
                     <i class="fa-solid fa-book-open"></i> បណ្ណាល័យ
@@ -461,6 +460,63 @@
             </div>
         </div>
     </footer>
+
+    <!-- HIGH PROFESSIONAL ADMIN LOGIN POPUP MODAL DIALOG -->
+    <div class="modal-overlay" id="indexAdminLoginModal">
+        <div class="modal-container" style="max-width: 410px; border-radius: 20px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.45);">
+            <div class="modal-header" style="justify-content: space-between; border-bottom: 1px solid var(--border-color); padding: 1.25rem 1.5rem; background: var(--bg-card);">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #2563eb, #1e3a8a); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.15rem; box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h3 class="modal-title" style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--text-main);">ផ្ទៀងផ្ទាត់សិទ្ធិ Admin</h3>
+                        <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px;">ADMIN SECURITY PORTAL</span>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeIndexAdminLoginModal()" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="modal-body" style="padding: 1.5rem;">
+                <div style="margin-bottom: 1.25rem; text-align: center;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+                        សូមបញ្ចូល <strong>Username</strong> និង <strong>Password</strong> ដើម្បីចូលប្រើប្រាស់សិទ្ធិ Admin (ហាមអ្នកផ្សេងចូល)
+                    </p>
+                </div>
+
+                <!-- Incorrect Password Error Alert -->
+                <div id="indexAdminLoginError" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; padding: 0.85rem; border-radius: 10px; font-size: 0.84rem; margin-bottom: 1.25rem; text-align: left; line-height: 1.5; animation: toastSlideIn 0.3s ease;">
+                    <i class="fa-solid fa-triangle-exclamation me-1" style="font-size: 1.05rem; vertical-align: middle;"></i> 
+                    <span><strong>បដិសេធការចូលប្រព័ន្ធ!</strong> ពាក្យសម្ងាត់ ឬឈ្មោះមិនត្រឹមត្រូវឡើយ។ ហាមអ្នកផ្សេងចូលប្រើប្រាស់!</span>
+                </div>
+
+                <form id="indexAdminLoginForm">
+                    <div class="form-group" style="margin-bottom: 1.15rem; text-align: left;">
+                        <label for="popupAdminUsername" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">ឈ្មោះអ្នកប្រើប្រាស់ (Username)</label>
+                        <div class="input-icon-wrapper">
+                            <input type="text" id="popupAdminUsername" placeholder="បញ្ចូលឈ្មោះអ្នកប្រើប្រាស់..." required autocomplete="off">
+                            <i class="fa-solid fa-user leading-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem; text-align: left;">
+                        <label for="popupAdminPassword" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text-main);">ពាក្យសម្ងាត់ (Password)</label>
+                        <div class="input-icon-wrapper">
+                            <input type="password" id="popupAdminPassword" placeholder="••••••••" required>
+                            <i class="fa-solid fa-lock leading-icon"></i>
+                            <button type="button" class="toggle-pass-btn" id="toggleIndexAdminPasswordBtn" title="បង្ហាញ/លាក់ ពាក្យសម្ងាត់">
+                                <i class="fa-solid fa-eye" id="toggleIndexAdminPasswordIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; height: 46px; font-size: 0.95rem; font-weight: 700; border-radius: 10px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35); cursor: pointer; transition: all 0.25s ease;">
+                        <i class="fa-solid fa-right-to-bracket me-1"></i> ផ្ទៀងផ្ទាត់ និងចូលប្រព័ន្ធ (Login)
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- GENERIC MODAL DIALOG -->
     <div class="modal-overlay" id="genericModal">

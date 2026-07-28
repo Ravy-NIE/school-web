@@ -1499,3 +1499,100 @@ body.light-theme .toast-notification {
     transform: scale(1.1);
 }
 
+/* High Professional Minimized Admin Login Button */
+.admin-nav-login-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.12);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    color: #38bdf8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    backdrop-filter: blur(8px);
+    text-decoration: none;
+}
+
+.admin-nav-login-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff !important;
+    border-color: #3b82f6;
+    transform: translateY(-2px) scale(1.06);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.admin-nav-login-btn.logged-in {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #10b981;
+}
+
+.admin-nav-login-btn.logged-in:hover {
+    background: linear-gradient(135deg, #10b981, #047857);
+    color: #ffffff !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Professional Input Group Styling */
+.input-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-wrapper i.leading-icon {
+    position: absolute;
+    left: 0.95rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    pointer-events: none;
+    transition: color 0.2s;
+    z-index: 2;
+}
+
+.input-icon-wrapper input {
+    padding-left: 2.6rem !important;
+    padding-right: 2.5rem !important;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    width: 100%;
+}
+
+.input-icon-wrapper input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    outline: none;
+}
+
+.input-icon-wrapper input:focus ~ i.leading-icon {
+    color: #3b82f6;
+}
+
+.input-icon-wrapper .toggle-pass-btn {
+    position: absolute;
+    right: 0.85rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.88rem;
+    padding: 0.2rem;
+    transition: color 0.2s;
+    z-index: 2;
+}
+
+.input-icon-wrapper .toggle-pass-btn:hover {
+    color: #3b82f6;
+}
+
+
