@@ -1,6 +1,9 @@
 // Main Application Controller
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 0. Load Saved Admin Uploads
+    loadSavedAdminUploads();
+
     // 1. Initialize Theme Switcher
     initTheme();
     
@@ -16,14 +19,43 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDocs('all', '');
     renderNews();
     
-    // 5. Setup Event Listeners
+    // 5. Setup Event Listeners & Admin Features
     setupEventListeners();
+    initAdminUpload();
 });
 
 /* ==========================================================================
-   IMAGE SLIDER CONTROLLER (5 SECONDS TIMER)
+   IMAGE SLIDER CONTROLLER (5 SECONDS TIMER) & DYNAMIC RENDER
    ========================================================================== */
+function renderSlides() {
+    const wrapper = document.getElementById('sliderWrapper');
+    const dotsContainer = document.getElementById('sliderDots');
+    if (!wrapper || !window.schoolData || !window.schoolData.slides) return;
+    
+    const slidesData = window.schoolData.slides;
+    const fallbackSlideImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='600' viewBox='0 0 1200 600'><rect width='100%25' height='100%25' fill='%230f172a'/><text x='50%25' y='50%25' fill='%233b82f6' font-size='32' text-anchor='middle' dominant-baseline='middle' font-family='sans-serif'>វិទ្យាល័យ ឧដុង្គ បច្ចេកវិទ្យា និងវិទ្យាសាស្ត្រ</text></svg>";
+
+    wrapper.innerHTML = slidesData.map((slide, index) => `
+        <div class="slide ${index === 0 ? 'active' : ''}">
+            <img src="${slide.image}" alt="${slide.title}" loading="lazy" onerror="this.onerror=null; this.src='${fallbackSlideImg}';">
+            <div class="slide-caption">
+                <span class="slide-badge"><i class="fa-solid ${slide.icon || 'fa-school'}"></i> ${slide.badge}</span>
+                <h2>${slide.title}</h2>
+                <p>${slide.caption}</p>
+            </div>
+        </div>
+    `).join('');
+
+    if (dotsContainer) {
+        dotsContainer.innerHTML = slidesData.map((_, index) => `
+            <span class="dot ${index === 0 ? 'active' : ''}" data-index="${index}"></span>
+        `).join('');
+    }
+}
+
 function initSlider() {
+    renderSlides();
+
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.dot');
     const prevBtn = document.getElementById('prevSlideBtn');
@@ -43,7 +75,7 @@ function initSlider() {
         slides.forEach(slide => slide.classList.remove('active'));
         dots.forEach(dot => dot.classList.remove('active'));
         
-        slides[index].classList.add('active');
+        if (slides[index]) slides[index].classList.add('active');
         if (dots[index]) dots[index].classList.add('active');
         
         currentIndex = index;
@@ -67,29 +99,29 @@ function initSlider() {
     }
     
     if (nextBtn) {
-        nextBtn.addEventListener('click', () => {
+        nextBtn.onclick = () => {
             nextSlide();
             startTimer();
-        });
+        };
     }
     
     if (prevBtn) {
-        prevBtn.addEventListener('click', () => {
+        prevBtn.onclick = () => {
             prevSlide();
             startTimer();
-        });
+        };
     }
     
     dots.forEach((dot, idx) => {
-        dot.addEventListener('click', () => {
+        dot.onclick = () => {
             showSlide(idx);
             startTimer();
-        });
+        };
     });
     
     if (sliderContainer) {
-        sliderContainer.addEventListener('mouseenter', stopTimer);
-        sliderContainer.addEventListener('mouseleave', startTimer);
+        sliderContainer.onmouseenter = stopTimer;
+        sliderContainer.onmouseleave = startTimer;
     }
     
     startTimer();
@@ -171,8 +203,9 @@ function renderPrograms() {
    ========================================================================== */
 let currentStaffDept = 'all';
 let currentStaffSearch = '';
+let currentTeacherSubject = 'all';
 
-function renderStaff(dept = 'all', query = '') {
+function renderStaff(dept = 'all', query = '', subject = 'all') {
     const container = document.getElementById('staffGrid');
     if (!container || !window.schoolData) return;
     
@@ -180,6 +213,10 @@ function renderStaff(dept = 'all', query = '') {
     
     if (dept !== 'all') {
         filtered = filtered.filter(s => s.dept === dept);
+    }
+    
+    if (dept === 'teaching' && subject !== 'all') {
+        filtered = filtered.filter(s => s.role.includes(subject));
     }
     
     if (query.trim() !== '') {
@@ -201,9 +238,11 @@ function renderStaff(dept = 'all', query = '') {
         return;
     }
     
+    const fallbackSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24'><rect width='100%25' height='100%25' fill='%231e293b'/><circle cx='12' cy='9' r='4' fill='%233b82f6'/><path d='M6 19c0-3.3 2.7-6 6-6s6 2.7 6 6' stroke='%233b82f6' stroke-width='2' fill='none'/></svg>";
+    
     container.innerHTML = filtered.map(staff => `
         <div class="staff-card">
-            <img src="${staff.avatar}" alt="${staff.nameKh}" class="staff-avatar" loading="lazy">
+            <img src="${staff.avatar}" alt="${staff.nameKh}" class="staff-avatar" loading="lazy" onerror="this.onerror=null; this.src='${fallbackSvg}';">
             <h3 class="staff-name-kh">${staff.nameKh}</h3>
             <div class="staff-name-en">${staff.nameEn}</div>
             <div class="staff-role-badge">${staff.role}</div>
@@ -288,22 +327,143 @@ function renderDocs(cat = 'all', query = '') {
 }
 
 /* ==========================================================================
-   NEWS RENDER
+   NEWS RENDER, FILTER, MODAL & DELETE CONTROLLER
    ========================================================================== */
-function renderNews() {
+let currentNewsCat = 'all';
+let currentNewsSearch = '';
+
+function deleteNewsItem(id, event) {
+    if (event) event.stopPropagation(); // Prevent opening modal when clicking delete button
+    
+    const item = window.schoolData.news.find(n => n.id === id);
+    const title = item ? item.title : 'ព័ត៌មាននេះ';
+    
+    if (confirm(`តើអ្នកពិតជាចង់លុប "${title}" នេះចេញពីប្រព័ន្ធមែនទេ?`)) {
+        // Remove from memory
+        window.schoolData.news = window.schoolData.news.filter(n => n.id !== id);
+
+        // Remove from localStorage if saved
+        try {
+            const saved = JSON.parse(localStorage.getItem('admin_uploaded_news') || '[]');
+            const updatedSaved = saved.filter(n => n.id !== id);
+            localStorage.setItem('admin_uploaded_news', JSON.stringify(updatedSaved));
+        } catch (e) {
+            console.error("Error updating localStorage after deleting news:", e);
+        }
+
+        // Re-render news grid
+        renderNews(currentNewsCat, currentNewsSearch);
+
+        // Show Toast Notification
+        showToast(`បានលុបព័ត៌មាន "${title}" ដោយជោគជ័យ!`, 'info');
+    }
+}
+
+function renderNews(cat = 'all', query = '') {
     const container = document.getElementById('newsGrid');
     if (!container || !window.schoolData) return;
     
-    container.innerHTML = window.schoolData.news.map(item => `
-        <div class="news-card">
-            <img src="${item.image}" alt="${item.title}" class="news-img" loading="lazy">
+    let filtered = window.schoolData.news;
+    
+    if (cat !== 'all') {
+        filtered = filtered.filter(n => n.category === cat);
+    }
+    
+    if (query.trim() !== '') {
+        const q = query.toLowerCase();
+        filtered = filtered.filter(n => 
+            n.title.toLowerCase().includes(q) || 
+            n.summary.toLowerCase().includes(q) ||
+            n.category.toLowerCase().includes(q)
+        );
+    }
+    
+    if (filtered.length === 0) {
+        container.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-muted);">
+                <i class="fa-solid fa-newspaper" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p>មិនរកឃើញព័ត៌មាន ឬសកម្មភាពដែលស្វែងរកឡើយ</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = filtered.map(item => `
+        <div class="news-card" onclick="openNewsModal('${item.id}')" style="cursor: pointer;">
+            <div style="position: relative; overflow: hidden; border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+                <img src="${item.image}" alt="${item.title}" class="news-img" loading="lazy" onerror="handleImageError(this, 'news')">
+                <span style="position: absolute; top: 1rem; left: 1rem; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.15); color: #38bdf8; font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: var(--radius-full); box-shadow: 0 4px 10px rgba(0,0,0,0.25);">
+                    ${item.category}
+                </span>
+                <!-- ADMIN ACTION BUTTONS: EDIT & DELETE -->
+                <div style="position: absolute; top: 0.85rem; right: 0.85rem; display: flex; gap: 0.4rem; z-index: 10;">
+                    <button type="button" class="news-edit-btn" onclick="openEditNewsModal('${item.id}', event)" title="កែសម្រួលព័ត៌មាននេះ (Admin)" style="background: rgba(59, 130, 246, 0.9); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: var(--transition); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);">
+                        <i class="fa-solid fa-pen-to-square" style="font-size: 0.85rem;"></i>
+                    </button>
+                    <button type="button" class="news-delete-btn" onclick="deleteNewsItem('${item.id}', event)" title="លុបព័ត៌មាននេះ (Admin)" style="background: rgba(239, 68, 68, 0.88); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: var(--transition); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);">
+                        <i class="fa-solid fa-trash-can" style="font-size: 0.85rem;"></i>
+                    </button>
+                </div>
+            </div>
             <div class="news-body">
-                <div class="news-date"><i class="fa-regular fa-calendar me-1"></i> ${item.date} • ${item.category}</div>
+                <div class="news-date" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fa-regular fa-calendar me-1"></i> ${item.date}</span>
+                    <span><i class="fa-regular fa-user me-1"></i> ${item.author || 'សាលា'}</span>
+                </div>
                 <h3 class="news-title">${item.title}</h3>
                 <p class="news-summary">${item.summary}</p>
+                <div style="margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; color: var(--accent-primary); font-weight: 600; padding-top: 0.8rem; border-top: 1px solid var(--border-color);">
+                    <span>អានព័ត៌មានលម្អិត <i class="fa-solid fa-arrow-right me-1"></i></span>
+                    <span style="color: var(--text-muted); font-weight: normal; font-size: 0.78rem;"><i class="fa-regular fa-eye me-1"></i> ${item.views || 120}</span>
+                </div>
             </div>
         </div>
     `).join('');
+}
+
+function openNewsModal(id) {
+    const item = window.schoolData.news.find(n => n.id === id);
+    if (!item) return;
+    
+    const modal = document.getElementById('genericModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    
+    modalTitle.innerText = "ព័ត៌មាន និងសកម្មភាពសាលា";
+    modalBody.innerHTML = `
+        <div style="margin-bottom: 1.25rem;">
+            <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                <span style="background: var(--accent-primary); color: white; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.75rem; border-radius: var(--radius-full);">
+                    ${item.category}
+                </span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;"><i class="fa-regular fa-calendar me-1"></i> ${item.date}</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">• <i class="fa-regular fa-user me-1"></i> ${item.author || 'គណៈគ្រប់គ្រងសាលា'}</span>
+            </div>
+            <h2 style="font-size: 1.35rem; font-weight: 700; line-height: 1.4; margin-bottom: 1rem;">${item.title}</h2>
+        </div>
+        
+        <img src="${item.image}" alt="${item.title}" style="width: 100%; max-height: 320px; object-fit: cover; border-radius: var(--radius-md); margin-bottom: 1.25rem; border: 1px solid var(--border-color);" onerror="handleImageError(this, 'news')">
+        
+        <div style="background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem;">
+            ${item.content || `<p>${item.summary}</p>`}
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--border-color); flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="btn" onclick="openEditNewsModal('${item.id}'); closeModal();" style="padding: 0.45rem 1rem; font-size: 0.85rem; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-md); cursor: pointer;">
+                    <i class="fa-solid fa-pen-to-square me-1"></i> កែសម្រួលព័ត៌មាន (Admin)
+                </button>
+                <button type="button" class="btn" onclick="deleteNewsItem('${item.id}'); closeModal();" style="padding: 0.45rem 1rem; font-size: 0.85rem; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); cursor: pointer;">
+                    <i class="fa-solid fa-trash-can me-1"></i> លុបព័ត៌មាន (Admin)
+                </button>
+            </div>
+            <button class="btn btn-secondary" onclick="alert('ការចែករំលែកដំណឹងបានជោគជ័យ!')" style="font-size: 0.85rem;">
+                <i class="fa-solid fa-share-nodes me-1"></i> ចែករំលែក (Share)
+            </button>
+        </div>
+    `;
+    
+    modal.classList.add('active');
 }
 
 /* ==========================================================================
@@ -417,15 +577,63 @@ function setupEventListeners() {
         });
     }
     
-    // Staff Category Filter Buttons
+    // Staff Category Filter Buttons & Dropdown logic
     const staffTabs = document.querySelectorAll('#staffTabs .tab-btn');
+    const teacherDropdown = document.getElementById('teacherDropdown');
+    const teacherTabBtn = document.getElementById('teacherTabBtn');
+    const teacherTabLabel = document.getElementById('teacherTabLabel');
+    const dropdownItems = document.querySelectorAll('#teacherDropdownMenu .dropdown-item');
+
     staffTabs.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            const dept = btn.getAttribute('data-dept');
+            
+            // Toggle dropdown if clicking teacher tab button
+            if (btn === teacherTabBtn) {
+                e.stopPropagation();
+                if (teacherDropdown) teacherDropdown.classList.toggle('open');
+            } else {
+                if (teacherDropdown) teacherDropdown.classList.remove('open');
+            }
+
             staffTabs.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentStaffDept = btn.getAttribute('data-dept');
-            renderStaff(currentStaffDept, currentStaffSearch);
+            currentStaffDept = dept;
+            renderStaff(currentStaffDept, currentStaffSearch, currentTeacherSubject);
         });
+    });
+
+    // Teacher Subject Dropdown Item Selection
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            
+            currentTeacherSubject = item.getAttribute('data-subject');
+            const rawText = item.textContent.trim();
+            const cleanText = rawText.replace(/\s*\(\d+នាក់\)/, '');
+            
+            if (teacherTabLabel) {
+                teacherTabLabel.textContent = currentTeacherSubject === 'all' ? 'គ្រូបង្រៀន' : `គ្រូ: ${cleanText}`;
+            }
+
+            // Highlight teacher tab
+            staffTabs.forEach(b => b.classList.remove('active'));
+            if (teacherTabBtn) teacherTabBtn.classList.add('active');
+            
+            currentStaffDept = 'teaching';
+            if (teacherDropdown) teacherDropdown.classList.remove('open');
+            
+            renderStaff(currentStaffDept, currentStaffSearch, currentTeacherSubject);
+        });
+    });
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+        if (teacherDropdown && !teacherDropdown.contains(e.target)) {
+            teacherDropdown.classList.remove('open');
+        }
     });
     
     // Staff Search Input Listener
@@ -433,7 +641,7 @@ function setupEventListeners() {
     if (staffSearchInput) {
         staffSearchInput.addEventListener('input', (e) => {
             currentStaffSearch = e.target.value;
-            renderStaff(currentStaffDept, currentStaffSearch);
+            renderStaff(currentStaffDept, currentStaffSearch, currentTeacherSubject);
         });
     }
     
@@ -457,6 +665,26 @@ function setupEventListeners() {
         });
     }
     
+    // News Category Filter Buttons
+    const newsTabs = document.querySelectorAll('#newsTabs .tab-btn');
+    newsTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            newsTabs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentNewsCat = btn.getAttribute('data-newscat');
+            renderNews(currentNewsCat, currentNewsSearch);
+        });
+    });
+
+    // News Search Input Listener
+    const newsSearchInput = document.getElementById('newsSearchInput');
+    if (newsSearchInput) {
+        newsSearchInput.addEventListener('input', (e) => {
+            currentNewsSearch = e.target.value;
+            renderNews(currentNewsCat, currentNewsSearch);
+        });
+    }
+
     // Contact Form Submission
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
@@ -468,7 +696,506 @@ function setupEventListeners() {
     }
 }
 
+function handleImageError(imgElem, type = 'news') {
+    if (!imgElem) return;
+    imgElem.onerror = null; // avoid infinite loop
+
+    const titleText = type === 'hero' ? 'វិទ្យាល័យ ឧដុង្គ' : (type === 'staff' ? 'រូបភាពបុគ្គលិក' : (type === 'doc' ? 'សៀវភៅបណ្ណាល័យ' : 'ព័ត៌មាន និងសកម្មភាពសាលា'));
+    
+    // Clean, high-quality SVG gradient placeholder with school icon
+    const svgData = `data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%231e293b'/%3E%3Cstop offset='100%25' stop-color='%230f172a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23bg)'/%3E%3Ccircle cx='400' cy='180' r='55' fill='%233b82f6' fill-opacity='0.25'/%3E%3Cpath d='M375 160h50v40h-50z' fill='%2338bdf8'/%3E%3Ctext x='400' y='275' font-family='sans-serif' font-size='22' font-weight='bold' fill='%23cbd5e1' text-anchor='middle'%3E${encodeURIComponent(titleText)}%3C/text%3E%3C/svg%3E`;
+
+    imgElem.src = svgData;
+}
+
+function openEditNewsModal(id, event) {
+    if (event) event.stopPropagation(); // Prevent opening view modal
+    
+    const item = window.schoolData.news.find(n => n.id === id);
+    if (!item) return;
+
+    const modal = document.getElementById('adminEditNewsModal');
+    if (!modal) return;
+
+    document.getElementById('editNewsId').value = item.id;
+    document.getElementById('editNewsTitle').value = item.title;
+    document.getElementById('editNewsCategory').value = item.category;
+    document.getElementById('editNewsAuthor').value = item.author || 'គណៈគ្រប់គ្រងសាលា';
+    document.getElementById('editNewsDate').value = item.date;
+    document.getElementById('editNewsSummary').value = item.summary;
+    document.getElementById('editNewsImgUrl').value = '';
+    document.getElementById('editNewsImgFile').value = '';
+    document.getElementById('editNewsPreviewImg').src = item.image;
+
+    modal.classList.add('active');
+}
+
+function closeEditNewsModal() {
+    const modal = document.getElementById('adminEditNewsModal');
+    if (modal) modal.classList.remove('active');
+}
+
 // Global functions for inline HTML calls
+window.handleImageError = handleImageError;
 window.openStaffModal = openStaffModal;
 window.openDocModal = openDocModal;
+window.openNewsModal = openNewsModal;
+window.openEditNewsModal = openEditNewsModal;
+window.closeEditNewsModal = closeEditNewsModal;
+window.deleteNewsItem = deleteNewsItem;
 window.downloadDoc = downloadDoc;
+
+/* ==========================================================================
+   ADMIN UPLOAD CONTROLLER (LIBRARY DOCUMENTS & NEWS ANNOUNCEMENTS)
+   ========================================================================== */
+function loadSavedAdminUploads() {
+    if (!window.schoolData) return;
+
+    // Load saved documents
+    try {
+        const savedDocs = JSON.parse(localStorage.getItem('admin_uploaded_docs') || '[]');
+        if (Array.isArray(savedDocs) && savedDocs.length > 0) {
+            window.schoolData.libraryDocs.unshift(...savedDocs);
+        }
+    } catch (e) {
+        console.error("Error loading saved admin docs:", e);
+    }
+
+    // Load saved news
+    try {
+        const savedNews = JSON.parse(localStorage.getItem('admin_uploaded_news') || '[]');
+        if (Array.isArray(savedNews) && savedNews.length > 0) {
+            window.schoolData.news.unshift(...savedNews);
+        }
+    } catch (e) {
+        console.error("Error loading saved admin news:", e);
+    }
+
+    // Apply saved edited news overrides
+    try {
+        const editedNewsMap = JSON.parse(localStorage.getItem('admin_edited_news') || '{}');
+        window.schoolData.news = window.schoolData.news.map(n => {
+            if (editedNewsMap[n.id]) {
+                return { ...n, ...editedNewsMap[n.id] };
+            }
+            return n;
+        });
+    } catch (e) {
+        console.error("Error applying edited news overrides:", e);
+    }
+
+    // Load custom hero image
+    try {
+        const customHero = localStorage.getItem('custom_hero_image');
+        if (customHero) {
+            const heroImg = document.getElementById('heroVisualImg');
+            if (heroImg) heroImg.src = customHero;
+        }
+    } catch (e) {
+        console.error("Error loading custom hero image:", e);
+    }
+}
+
+function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `
+        <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}" style="color: ${type === 'success' ? '#10b981' : '#3b82f6'}; font-size: 1.2rem;"></i>
+        <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
+function initAdminUpload() {
+    const adminNavBtn = document.getElementById('adminUploadNavBtn');
+    const adminModal = document.getElementById('adminUploadModal');
+    const adminCloseBtn = document.getElementById('adminModalCloseBtn');
+    const tabDocBtn = document.getElementById('tabDocBtn');
+    const tabNewsBtn = document.getElementById('tabNewsBtn');
+    const docForm = document.getElementById('adminUploadDocForm');
+    const newsForm = document.getElementById('adminUploadNewsForm');
+
+    // Open Admin Modal
+    if (adminNavBtn && adminModal) {
+        adminNavBtn.addEventListener('click', () => {
+            adminModal.classList.add('active');
+        });
+    }
+
+    // Close Admin Modal
+    if (adminCloseBtn && adminModal) {
+        adminCloseBtn.addEventListener('click', () => {
+            adminModal.classList.remove('active');
+        });
+        adminModal.addEventListener('click', (e) => {
+            if (e.target === adminModal) adminModal.classList.remove('active');
+        });
+    }
+
+    const tabHeroImgBtn = document.getElementById('tabHeroImgBtn');
+    const heroForm = document.getElementById('adminChangeHeroForm');
+    const quickChangeHeroBtn = document.getElementById('quickChangeHeroBtn');
+
+    // Quick Hero Change Button Click
+    if (quickChangeHeroBtn && adminModal && tabHeroImgBtn) {
+        quickChangeHeroBtn.addEventListener('click', () => {
+            adminModal.classList.add('active');
+            tabHeroImgBtn.click();
+        });
+    }
+
+    // 3-Tab Switcher
+    if (tabDocBtn && tabNewsBtn && tabHeroImgBtn && docForm && newsForm && heroForm) {
+        tabDocBtn.addEventListener('click', () => {
+            tabDocBtn.classList.add('active');
+            tabNewsBtn.classList.remove('active');
+            tabHeroImgBtn.classList.remove('active');
+            docForm.style.display = 'block';
+            newsForm.style.display = 'none';
+            heroForm.style.display = 'none';
+        });
+
+        tabNewsBtn.addEventListener('click', () => {
+            tabNewsBtn.classList.add('active');
+            tabDocBtn.classList.remove('active');
+            tabHeroImgBtn.classList.remove('active');
+            newsForm.style.display = 'block';
+            docForm.style.display = 'none';
+            heroForm.style.display = 'none';
+        });
+
+        tabHeroImgBtn.addEventListener('click', () => {
+            tabHeroImgBtn.classList.add('active');
+            tabDocBtn.classList.remove('active');
+            tabNewsBtn.classList.remove('active');
+            heroForm.style.display = 'block';
+            docForm.style.display = 'none';
+            newsForm.style.display = 'none';
+        });
+    }
+
+    // Handle Upload Document Form Submit
+    if (docForm) {
+        docForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('adminDocTitle').value.trim();
+            const category = document.getElementById('adminDocCategory').value;
+            const author = document.getElementById('adminDocAuthor').value.trim();
+            const year = document.getElementById('adminDocYear').value.trim() || '2026';
+            const pages = document.getElementById('adminDocPages').value || 180;
+            const fileSize = document.getElementById('adminDocSize').value.trim() || '15 MB';
+            const coverUrlInput = document.getElementById('adminDocCoverUrl').value.trim();
+            const coverFile = document.getElementById('adminDocCoverFile').files[0];
+            const desc = document.getElementById('adminDocDesc').value.trim();
+
+            const categoryKhMap = {
+                technology: "បច្ចេកវិទ្យា",
+                science: "វិទ្យាសាស្ត្រ",
+                history: "ប្រវត្តិវិទ្យា",
+                language: "ភាសាបរទេស",
+                economics: "សេដ្ឋកិច្ច"
+            };
+
+            const defaultCovers = {
+                technology: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=400",
+                science: "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=400",
+                history: "https://images.unsplash.com/photo-1608488454765-b471456a68d0?auto=format&fit=crop&q=80&w=400",
+                language: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&q=80&w=400",
+                economics: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400"
+            };
+
+            function processSaveDoc(coverImageSrc) {
+                const newDoc = {
+                    id: 'doc-' + Date.now(),
+                    title: title,
+                    category: category,
+                    categoryKh: categoryKhMap[category] || category,
+                    author: author,
+                    year: year,
+                    fileSize: fileSize,
+                    pages: parseInt(pages) || 150,
+                    type: "PDF",
+                    views: 1,
+                    downloads: 0,
+                    cover: coverImageSrc,
+                    description: desc,
+                    previewContent: `
+                        <h3>${title}</h3>
+                        <p>${desc}</p>
+                        <div style="background: rgba(56, 189, 248, 0.08); padding: 15px; border-left: 4px solid #3b82f6; margin: 12px 0; border-radius: 4px;">
+                            <strong>អ្នកនិពន្ធ / គ្រូបង្រៀន:</strong> ${author} <br>
+                            <strong>ឆ្នាំបោះពុម្ព:</strong> ${year} | <strong>ប្រភេទ:</strong> ${categoryKhMap[category] || category}
+                        </div>
+                    `
+                };
+
+                window.schoolData.libraryDocs.unshift(newDoc);
+
+                try {
+                    const saved = JSON.parse(localStorage.getItem('admin_uploaded_docs') || '[]');
+                    saved.unshift(newDoc);
+                    localStorage.setItem('admin_uploaded_docs', JSON.stringify(saved));
+                } catch (err) {
+                    console.error("Failed to save doc to localStorage:", err);
+                }
+
+                renderDocs('all', '');
+                docForm.reset();
+                if (adminModal) adminModal.classList.remove('active');
+                showToast(`បាន Upload ឯកសារ "${title}" ដោយជោគជ័យ!`);
+                
+                const libElem = document.getElementById('library');
+                if (libElem) libElem.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            if (coverFile) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    processSaveDoc(evt.target.result);
+                };
+                reader.readAsDataURL(coverFile);
+            } else {
+                const finalCover = coverUrlInput || defaultCovers[category] || defaultCovers.technology;
+                processSaveDoc(finalCover);
+            }
+        });
+    }
+
+    // Handle Upload News Form Submit
+    if (newsForm) {
+        newsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const title = document.getElementById('adminNewsTitle').value.trim();
+            const category = document.getElementById('adminNewsCategory').value;
+            const date = document.getElementById('adminNewsDate').value.trim() || '២៨ កក្កដា ២០២៦';
+            const imgUrlInput = document.getElementById('adminNewsImgUrl').value.trim();
+            const imgFile = document.getElementById('adminNewsImgFile').files[0];
+            const summary = document.getElementById('adminNewsSummary').value.trim();
+
+            const defaultNewsImages = [
+                "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&q=80&w=600",
+                "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&q=80&w=600",
+                "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=600"
+            ];
+
+            function processSaveNews(bannerImageSrc) {
+                const newNews = {
+                    id: 'news-' + Date.now(),
+                    title: title,
+                    date: date,
+                    category: category,
+                    image: bannerImageSrc,
+                    summary: summary
+                };
+
+                window.schoolData.news.unshift(newNews);
+
+                try {
+                    const saved = JSON.parse(localStorage.getItem('admin_uploaded_news') || '[]');
+                    saved.unshift(newNews);
+                    localStorage.setItem('admin_uploaded_news', JSON.stringify(saved));
+                } catch (err) {
+                    console.error("Failed to save news to localStorage:", err);
+                }
+
+                renderNews();
+                newsForm.reset();
+                if (adminModal) adminModal.classList.remove('active');
+                showToast(`បាន ចុះផ្សាយព័ត៌មាន "${title}" ដោយជោគជ័យ!`);
+
+                const newsElem = document.getElementById('news');
+                if (newsElem) newsElem.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            if (imgFile) {
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    processSaveNews(evt.target.result);
+                };
+                reader.readAsDataURL(imgFile);
+            } else {
+                const finalImg = imgUrlInput || defaultNewsImages[Math.floor(Math.random() * defaultNewsImages.length)];
+                processSaveNews(finalImg);
+            }
+        });
+    }
+
+    // Handle Hero Image Change Form Submit & Live Preview
+    const heroImgFile = document.getElementById('adminHeroImgFile');
+    const heroImgUrl = document.getElementById('adminHeroImgUrl');
+    const heroPreviewImg = document.getElementById('heroPreviewImg');
+
+    if (heroImgFile && heroPreviewImg) {
+        heroImgFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    heroPreviewImg.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (heroImgUrl && heroPreviewImg) {
+        heroImgUrl.addEventListener('input', (e) => {
+            if (e.target.value.trim()) {
+                heroPreviewImg.src = e.target.value.trim();
+            }
+        });
+    }
+
+    if (heroForm) {
+        heroForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const file = heroImgFile ? heroImgFile.files[0] : null;
+            const urlVal = heroImgUrl ? heroImgUrl.value.trim() : '';
+
+            function updateHeroSrc(src) {
+                const heroImg = document.getElementById('heroVisualImg');
+                if (heroImg) heroImg.src = src;
+
+                try {
+                    localStorage.setItem('custom_hero_image', src);
+                } catch (err) {
+                    console.error("Failed to save custom hero image to localStorage:", err);
+                }
+
+                heroForm.reset();
+                if (adminModal) adminModal.classList.remove('active');
+                showToast("បានផ្លាស់ប្តូររូបភាព Hero ដោយជោគជ័យ! (Anti-Distortion Applied)", "success");
+            }
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    updateHeroSrc(evt.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else if (urlVal) {
+                updateHeroSrc(urlVal);
+            } else {
+                alert("សូមជ្រើសរើសហ្វាល់រូបភាព ឬបញ្ចូល URL រូបភាពជាមុនសិន!");
+            }
+        });
+    }
+
+    // Admin Edit News Modal Listeners
+    const editModal = document.getElementById('adminEditNewsModal');
+    const editCloseBtn = document.getElementById('editNewsModalCloseBtn');
+    const editCancelBtn = document.getElementById('editNewsCancelBtn');
+    const editForm = document.getElementById('adminEditNewsForm');
+    const editImgFile = document.getElementById('editNewsImgFile');
+    const editImgUrl = document.getElementById('editNewsImgUrl');
+    const editPreviewImg = document.getElementById('editNewsPreviewImg');
+
+    if (editCloseBtn) editCloseBtn.addEventListener('click', closeEditNewsModal);
+    if (editCancelBtn) editCancelBtn.addEventListener('click', closeEditNewsModal);
+    if (editModal) {
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) closeEditNewsModal();
+        });
+    }
+
+    if (editImgFile && editPreviewImg) {
+        editImgFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    editPreviewImg.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (editImgUrl && editPreviewImg) {
+        editImgUrl.addEventListener('input', (e) => {
+            if (e.target.value.trim()) {
+                editPreviewImg.src = e.target.value.trim();
+            }
+        });
+    }
+
+    if (editForm) {
+        editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('editNewsId').value;
+            const title = document.getElementById('editNewsTitle').value.trim();
+            const category = document.getElementById('editNewsCategory').value;
+            const author = document.getElementById('editNewsAuthor').value.trim();
+            const date = document.getElementById('editNewsDate').value.trim();
+            const summary = document.getElementById('editNewsSummary').value.trim();
+            const file = editImgFile ? editImgFile.files[0] : null;
+            const urlVal = editImgUrl ? editImgUrl.value.trim() : '';
+
+            const item = window.schoolData.news.find(n => n.id === id);
+            if (!item) return;
+
+            function applyNewsUpdate(newImgSrc) {
+                item.title = title;
+                item.category = category;
+                item.author = author;
+                item.date = date;
+                item.summary = summary;
+                if (newImgSrc) item.image = newImgSrc;
+
+                // Save override to localStorage
+                try {
+                    const editedMap = JSON.parse(localStorage.getItem('admin_edited_news') || '{}');
+                    editedMap[id] = {
+                        title: item.title,
+                        category: item.category,
+                        author: item.author,
+                        date: item.date,
+                        summary: item.summary,
+                        image: item.image
+                    };
+                    localStorage.setItem('admin_edited_news', JSON.stringify(editedMap));
+
+                    // Also update admin_uploaded_news if present
+                    const savedNews = JSON.parse(localStorage.getItem('admin_uploaded_news') || '[]');
+                    const idx = savedNews.findIndex(n => n.id === id);
+                    if (idx !== -1) {
+                        savedNews[idx] = { ...savedNews[idx], ...editedMap[id] };
+                        localStorage.setItem('admin_uploaded_news', JSON.stringify(savedNews));
+                    }
+                } catch (err) {
+                    console.error("Failed to save edited news to localStorage:", err);
+                }
+
+                renderNews(currentNewsCat, currentNewsSearch);
+                closeEditNewsModal();
+                showToast(`បានកែសម្រួលព័ត៌មាន "${title}" ដោយជោគជ័យ! (Anti-Distortion Preserved)`, "success");
+            }
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    applyNewsUpdate(evt.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else if (urlVal) {
+                applyNewsUpdate(urlVal);
+            } else {
+                applyNewsUpdate(null);
+            }
+        });
+    }
+}
